@@ -87,6 +87,12 @@ public class GreetService implements Service {
             .post("/slowgreeting", this::updateGreetingJsonSlowlyHandler);
     }
 
+    /**
+     * Runs for every request and increments a simple counter.
+     * Calls request.next() to ensure other handlers are called.
+     * @param request
+     * @param response
+     */
     private void counterFilter(final ServerRequest request,
                                final ServerResponse response) {
         displayThread();
@@ -204,15 +210,19 @@ public class GreetService implements Service {
                 .buildSpan("updateGreetingFromJsonSlowlyHandler")
                 .asChildOf(request.spanContext())
                 .start();
+
         /*
          * Get the request body, and when it completes process it asynchronously
          * using updateGreetingFromJsonSlowly(). We use Async because the operation
-         * is slow and this  will offload the work to the default CompletionStage
-         * threadpool.
+         * is slow and this will offload the work to the default CompletionStage
+         * threadpool. In real life you'd want to provide your own ExecutorService
+         * instead of using the default pool since it's used for multiple things
+         * by the concurrency package.
          *
          * We pass the span to the consumer so it can close it.
          */
-        request.content().as(JsonObject.class).thenAcceptAsync(jo -> updateGreetingFromJsonSlowly(jo, response, span) );
+        request.content().as(JsonObject.class)
+                .thenAcceptAsync(jo -> updateGreetingFromJsonSlowly(jo, response, span) );
     }
 
     private void updateGreetingFromJsonSlowly(JsonObject jo, ServerResponse response, Span span) {
@@ -221,24 +231,23 @@ public class GreetService implements Service {
         if (jo.isNull("greeting")) {
             response.status(Http.Status.BAD_REQUEST_400)
                     .send("No greeting in your JSON dude!");
-            span.finish();
-            return;
+        } else {
+            int delayInSecs = jo.getInt("delay", 2);
+            try {
+                Thread.sleep(delayInSecs * 1000);
+            } catch (InterruptedException e) {
+            }
+
+            greeting = jo.getString("greeting");
+            JsonObject returnObject = Json.createObjectBuilder()
+                    .add("greeting", greeting)
+                    .build();
+            response.send(returnObject);
         }
-
-        greeting = jo.getString("greeting");
-
-        int delayInSecs = jo.getInt("delay", 2);
-        try { Thread.sleep(delayInSecs * 1000); } catch (InterruptedException e) {}
-
-        JsonObject returnObject = Json.createObjectBuilder()
-                .add("greeting", greeting)
-                .build();
 
         if (span != null) {
             span.finish();
         }
-
-        response.send(returnObject);
     }
 
     private void displayThread() {

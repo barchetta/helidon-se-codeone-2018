@@ -44,7 +44,7 @@ import io.opentracing.util.GlobalTracer;
  * TODO:
  *  Security
  *  Big payloads (streaming)
- *  Error handling
+ *  Error / Exception handling
  *  Logging
  */
 public final class Main {

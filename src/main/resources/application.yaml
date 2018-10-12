@@ -19,6 +19,8 @@ app:
 
 services:
   zipkin.endpoint: "http://localhost:9411"
+# Use this hostname if running in a docker container
+#  zipkin.endpoint: "http://docker.for.mac.localhost:9411"
 
 webserver:
   port: 8080
