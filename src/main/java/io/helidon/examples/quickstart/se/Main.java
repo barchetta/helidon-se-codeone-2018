@@ -40,12 +40,12 @@ import io.opentracing.util.GlobalTracer;
  *  JSON payload async
  *  Metrics
  *  Tracing
+ *  Health and Ready Check
  * TODO:
  *  Security
  *  Big payloads (streaming)
  *  Error handling
  *  Logging
- *  Health Check? Maybe not
  */
 public final class Main {
 
