@@ -17,6 +17,9 @@
 app:
   greeting: "Hello"
 
-server:
+services:
+  zipkin.endpoint: "http://localhost:9411"
+
+webserver:
   port: 8080
   host: 0.0.0.0

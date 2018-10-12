@@ -26,6 +26,9 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
 import io.helidon.webserver.Service;
+import io.opentracing.Span;
+import io.opentracing.SpanContext;
+import io.opentracing.util.GlobalTracer;
 import org.eclipse.microprofile.metrics.Counter;
 import org.eclipse.microprofile.metrics.MetricRegistry;
 
@@ -195,20 +198,31 @@ public class GreetService implements Service {
         displayThread();
 
         /*
+         * We create a tracing span for this long operation. We create it as
+         * a child of the request's span.
+         */
+        Span span = GlobalTracer.get()
+                .buildSpan("updateGreetingFromJsonSlowlyHandler")
+                .asChildOf(request.spanContext())
+                .start();
+        /*
          * Get the request body, and when it completes process it asynchronously
          * using updateGreetingFromJsonSlowly(). We use Async because the operation
          * is slow and this  will offload the work to the default CompletionStage
          * threadpool.
+         *
+         * We pass the span to the consumer so it can close it.
          */
-        request.content().as(JsonObject.class).thenAcceptAsync(jo -> updateGreetingFromJsonSlowly(jo, response) );
+        request.content().as(JsonObject.class).thenAcceptAsync(jo -> updateGreetingFromJsonSlowly(jo, response, span) );
     }
 
-    private void updateGreetingFromJsonSlowly(JsonObject jo, ServerResponse response) {
+    private void updateGreetingFromJsonSlowly(JsonObject jo, ServerResponse response, Span span) {
         displayThread();
 
         if (jo.isNull("greeting")) {
             response.status(Http.Status.BAD_REQUEST_400)
                     .send("No greeting in your JSON dude!");
+            span.finish();
             return;
         }
 
@@ -220,6 +234,11 @@ public class GreetService implements Service {
         JsonObject returnObject = Json.createObjectBuilder()
                 .add("greeting", greeting)
                 .build();
+
+        if (span != null) {
+            span.finish();
+        }
+
         response.send(returnObject);
     }
 

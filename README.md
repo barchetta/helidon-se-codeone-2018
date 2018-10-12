@@ -58,12 +58,6 @@ curl -X POST -d '{"greeting" : "Howdy"}' http://localhost:8080/greet/greeting
 # Using asynchronous processing
 curl -X POST -d '{"greeting" : "Hi"}' http://localhost:8080/greet/slowgreeting
 
-# Get Metrics in JSON format
-curl -H 'Accept: application/json' -X GET http://localhost:8080/metrics/ | json_pp
-
-# Get Metrics in Prometheus format
-curl -H 'Accept: text/plain' -X GET http://localhost:8080/metrics/
-
 ```
 
 ## Build the Docker Image
@@ -88,3 +82,40 @@ kubectl get pods                    # Verify connectivity to cluster
 kubectl create -f target/app.yaml   # Deply application
 kubectl get service quickstart-se  # Get service info
 ```
+
+## Metrics
+
+The application makes metrics available at the `/metrics/` endpoint.
+You can get metrics in JSON and Prometheus format:
+
+```
+# Get Metrics in JSON format
+curl -H 'Accept: application/json' -X GET http://localhost:8080/metrics/ | json_pp
+
+# Get Metrics in Prometheus format
+curl -H 'Accept: text/plain' -X GET http://localhost:8080/metrics/
+```
+
+
+## Tracing
+
+By default the application is configured to connect to zipkin at `http://localhost:9411`.
+This is configured in `application.yaml`.
+
+Start the Zipkin docker container:
+
+```
+docker run -d -p 9411:9411 openzipkin/zipkin
+```
+
+Then exercise the application:
+
+```
+curl -X POST -d '{"greeting" : "Howdy"}' http://localhost:8080/greet/slowgreeting
+```
+ 
+To view traces go to http://localhost:9411/zipkin/
+
+Click on "Find a Trace". Click on "Find Traces" and sort by newest. 
+You should see a roughly 2 second trace.
+

@@ -17,6 +17,7 @@
 package io.helidon.examples.quickstart.se;
 
 import java.io.IOException;
+import java.util.Optional;
 import java.util.logging.LogManager;
 
 import io.helidon.config.Config;
@@ -25,6 +26,9 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.json.JsonSupport;
+import io.helidon.webserver.zipkin.ZipkinTracerBuilder;
+import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 
 /**
  * Simple Hello World rest application.
@@ -34,8 +38,8 @@ import io.helidon.webserver.json.JsonSupport;
  *  JSON payload response
  *  JSON payload async
  *  Metrics
- * TODO:
  *  Tracing
+ * TODO:
  *  Security
  *  Big payloads (streaming)
  *  Error handling
@@ -63,6 +67,28 @@ public final class Main {
     }
 
     /**
+     * Create a {@code Tracer} instance using the given {@code Config}.
+     * @param config the configuration root
+     * @return the created {@code Tracer}
+     */
+    private static Tracer createTracer(final Config config) {
+        Optional<String> zipkinEndpoint = config.get("services.zipkin.endpoint")
+                .asOptionalString();
+
+        if (zipkinEndpoint.isPresent()) {
+            System.out.println("Sending trace data to " + zipkinEndpoint.get());
+            Tracer tracer = ZipkinTracerBuilder.forService("greet-service")
+                    .zipkin(zipkinEndpoint.get())
+                    .build();
+            GlobalTracer.register(tracer);
+        } else {
+            System.out.println("services.zipkin.uri not defined. Sending no trace data");
+        }
+
+        return GlobalTracer.get();
+    }
+
+    /**
      * Application main entry point.
      * @param args command line arguments.
      * @throws IOException if there are problems reading logging properties
@@ -85,9 +111,9 @@ public final class Main {
         // By default this will pick up application.yaml from the classpath
         Config config = Config.create();
 
-        // Get webserver config from the "server" section of application.yaml
-        ServerConfiguration serverConfig =
-                ServerConfiguration.fromConfig(config.get("server"));
+        ServerConfiguration serverConfig = ServerConfiguration.builder(config.get("webserver"))
+                .tracer(createTracer(config))
+                .build();
 
         WebServer server = WebServer.create(serverConfig, createRouting());
 
