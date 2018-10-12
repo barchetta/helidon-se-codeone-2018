@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.logging.LogManager;
 
+import io.helidon.common.http.Http;
 import io.helidon.config.Config;
 import io.helidon.metrics.MetricsSupport;
 import io.helidon.webserver.Routing;
@@ -62,6 +63,14 @@ public final class Main {
         return Routing.builder()
                 .register(JsonSupport.get())
                 .register(MetricsSupport.create())
+                .get("/health", (req, res) -> {
+                    res.status(Http.Status.OK_200);
+                    res.send("OK!");
+                })
+                .get("/ready", (req, res) -> {
+                    res.status(Http.Status.OK_200);
+                    res.send("Ready!");
+                })
                 .register("/greet", new GreetService())
                 .build();
     }
