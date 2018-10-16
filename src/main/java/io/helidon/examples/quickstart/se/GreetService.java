@@ -22,6 +22,7 @@ import javax.json.JsonObject;
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
 import io.helidon.metrics.RegistryFactory;
+import io.helidon.security.webserver.WebSecurity;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
@@ -81,8 +82,9 @@ public class GreetService implements Service {
         rules
             .any(this::counterFilter)
             .get("/", this::getDefaultMessageHandler)
+            .get("/greeting", this::getGreetingHandler)
             .get("/{name}", this::getMessageHandler)
-            .put("/greeting/{greeting}", this::updateGreetingHandler)
+            .put("/greeting/{greeting}", WebSecurity.authenticate(), this::updateGreetingHandler)
             .post("/greeting", this::updateGreetingJsonHandler)
             .post("/slowgreeting", this::updateGreetingJsonSlowlyHandler);
     }
@@ -132,6 +134,23 @@ public class GreetService implements Service {
 
         JsonObject returnObject = Json.createObjectBuilder()
                 .add("message", msg)
+                .build();
+        response.send(returnObject);
+    }
+
+    /**
+     * Get the greeting in use. curl -X GET
+     * http://localhost:8080/greet/greeting
+     *
+     * @param request the server request
+     * @param response the server response
+     */
+    private void getGreetingHandler(final ServerRequest request,
+            final ServerResponse response) {
+        displayThread();
+
+        JsonObject returnObject = Json.createObjectBuilder()
+                .add("greeting", greeting)
                 .build();
         response.send(returnObject);
     }

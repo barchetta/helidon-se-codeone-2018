@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8"/>
+    <title>HelidonSE CodeOne Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="HelidonSE CodeOne Demo">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <link href="css/google-signin.css" rel="stylesheet">
+    <link href="css/custom.css" rel="stylesheet">
+    <link rel="shortcut icon" type="image/x-icon" href="img/favicon.ico"/>
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+    <nav class="navbar navbar-inverse navbar-fixed-top navbar-default">
+      <div id="navbar-wrapper" class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Helidon SE CodeOne Demo</a>
+        </div>
+
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav navbar-right">
+            <li id="signin-btn" style="display:none">
+                <div class="abcRioButton abcRioButtonBlue">
+                  <div style="" class="abcRioButton abcRioButtonLightBlue">
+                    <div class="abcRioButtonContentWrapper">
+                      <div class="abcRioButtonIcon">
+                        <div class="abcRioButtonIconImage"></div>
+                      </div>
+                      <span class="abcRioButtonContents">
+                        <span>Sign in with Google</span>
+                      </span>
+                    </div>
+                  </div>
+                </div>
+             </li>
+             <li id="userinfo" class="dropdown" style="display:none">
+               <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                 <span id="email-text"></span>
+                 <span class="glyphicon glyphicon-user" style="margin-left:10px;"></span>
+                 <span class="caret"></span>
+               </a>
+               <ul class="dropdown-menu">
+                 <li><a id="signout-btn" href="#">Sign out</a></li>
+               </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <div class="container">
+      <div class="row">
+
+        <div id="error-modal" class="modal fade" role="dialog">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Error</h4>
+              </div>
+              <div class="modal-body">
+                <p></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="result-modal" class="modal fade" role="dialog">
+          <div class="modal-dialog modal-sm">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title">Result</h4>
+              </div>
+              <div class="modal-body">
+                <p></p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-wrapper" style="display:none">
+          <div class="container">
+          <div class="row">
+            <div class="col-xs-8 col-sm-8 col-md-4 col-lg-6">
+              <h1><span class="glyphicon glyphicon-globe" aria-hidden="true"></span>Greet</h1>
+              <div class="input-group">
+                <div class="input-group-btn" id="greeting-form">
+                  <input type="text" class="form-control" aria-label="...">
+                  <button type="button" class="btn btn-default">Do a greet!</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <hr>
+          <div id="update-greeting-section"/>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.js"></script>
+    <script src="js/ui.js"></script>
+    <script>
+      window.onLoadCallback = function() {
+          $("#refresh-btn").click(loadPage);
+          // gapi available
+          gapi.load('auth2', function () {
+              // on body load
+              $(function () {
+                  try {
+                      gapi.auth2.init({
+                          client_id: '411141580938-22cb4vgedb5jgo8odatalqe4n0jpvc85.apps.googleusercontent.com'
+                      }).then(function (auth) {
+                          auth.attachClickHandler('signin-btn', {}, loadPage0, clearPageError);
+                          loadPage0();
+                      }, clearPageError);
+                  } catch (err) {
+                      clearPageError(err);
+                  }
+              });
+          });
+      };
+    </script>
+    <script src="https://apis.google.com/js/api:client.js?onload=onLoadCallback"></script>
+
+    <!-- templates -->
+
+    <script id="update_greeting_tpl" type="x-tmpl-mustache">
+      <div class="row">
+        <div class="col-xs-8 col-sm-8 col-md-4 col-lg-6">
+          <h1><span class="glyphicon glyphicon-lock" aria-hidden="true"></span>Update Greeting</h1>
+          <div class="input-group">
+            <div class="input-group-btn" id="update-greeting-form">
+              <input type="text" class="form-control" aria-label="..." value="{{greeting}}">
+              <button type="button" class="btn btn-default">Update greeting!</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </script>
+  </body>
+</html>
