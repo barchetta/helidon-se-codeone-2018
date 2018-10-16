@@ -44,8 +44,3 @@ security:
         # Configure proxy host if needed
         proxy-host: "${ALIAS=security.properties.proxy-host}"
         # proxy-port: 80
-  web-server:
-    paths:
-      - path: "/rest/profile"
-        methods: ["get"]
-        authenticate: true
