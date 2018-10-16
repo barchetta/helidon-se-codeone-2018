@@ -25,3 +25,27 @@ services:
 webserver:
   port: 8080
   host: 0.0.0.0
+
+security:
+  config.require-encryption: false
+  properties:
+    google-client-id: "411141580938-22cb4vgedb5jgo8odatalqe4n0jpvc85.apps.googleusercontent.com"
+    proxy-host: "www-proxy-hqdc.us.oracle.com"
+  providers:
+    - google-login:
+        # Create your own application in Google developer console
+        # Also update the client id configured in header of index.html
+        # Detailed how-to for login button (including links how to create an application):
+        # https://developers.google.com/identity/sign-in/web/sign-in
+        client-id: "${ALIAS=security.properties.google-client-id}"
+        # Defaults for Helidon
+        # realm: "helidon"
+
+        # Configure proxy host if needed
+        proxy-host: "${ALIAS=security.properties.proxy-host}"
+        # proxy-port: 80
+  web-server:
+    paths:
+      - path: "/rest/profile"
+        methods: ["get"]
+        authenticate: true
