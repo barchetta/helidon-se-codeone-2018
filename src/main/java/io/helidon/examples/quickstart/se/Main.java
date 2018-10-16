@@ -21,29 +21,20 @@ import java.util.Optional;
 import java.util.logging.LogManager;
 
 import io.helidon.common.http.Http;
-import io.helidon.common.http.MediaType;
 import io.helidon.config.Config;
 import io.helidon.metrics.MetricsSupport;
-import io.helidon.security.AuthenticationResponse;
-import io.helidon.security.ProviderRequest;
+import io.helidon.security.Security;
+import io.helidon.security.webserver.WebSecurity;
+import io.helidon.security.google.GoogleTokenProvider;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
+import io.helidon.webserver.StaticContentSupport;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.json.JsonSupport;
 import io.helidon.webserver.zipkin.ZipkinTracerBuilder;
-import io.helidon.security.Security;
-import io.helidon.security.webserver.WebSecurity;
-import io.helidon.security.SecurityContext;
-import io.helidon.security.Subject;
-import io.helidon.security.google.GoogleTokenProvider;
-import io.helidon.security.spi.SubjectMappingProvider;
-import io.helidon.webserver.ServerRequest;
-import io.helidon.webserver.ServerResponse;
-import io.helidon.webserver.StaticContentSupport;
 
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
-import java.util.concurrent.CompletionStage;
 
 /**
  * Simple Hello World rest application.
@@ -75,7 +66,7 @@ public final class Main {
      */
     private static Routing createRouting(WebSecurity webSecurity) {
         return Routing.builder()
-                .register(webSecurity.securityDefaults(WebSecurity.allowAnonymous()))
+                .register(webSecurity)
                 .register(JsonSupport.get())
                 .register(MetricsSupport.create())
                 .get("/health", (req, res) -> {
