@@ -77,10 +77,9 @@ public final class Main {
                     res.status(Http.Status.OK_200);
                     res.send("Ready!");
                 })
-                .register("",
-                        StaticContentSupport.builder("/WEB", Main.class.getClassLoader())
-                                .welcomeFileName("index.html")
-                                .build())
+                .register(StaticContentSupport.builder("/WEB", Main.class.getClassLoader())
+                    .welcomeFileName("index.html")
+                    .build())
                 .register("/greet", new GreetService())
                 .build();
     }

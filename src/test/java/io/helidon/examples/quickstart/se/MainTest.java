@@ -70,6 +70,8 @@ public class MainTest {
         Assertions.assertEquals("Hello Joe!", jsonObject.getString("message"),
                 "hello Joe message");
 
+        // This endpoint is now secured and requires authentication
+        /*
         conn = getURLConnection("PUT", "/greet/greeting/Hola");
         Assertions.assertEquals(200, conn.getResponseCode(), "HTTP response3");
         conn = getURLConnection("GET", "/greet/Jose");
@@ -78,6 +80,7 @@ public class MainTest {
         jsonObject = jsonReader.readObject();
         Assertions.assertEquals("Hola Jose!", jsonObject.getString("message"),
                 "hola Jose message");
+                */
     }
 
     private HttpURLConnection getURLConnection(String method, String path) throws Exception {
