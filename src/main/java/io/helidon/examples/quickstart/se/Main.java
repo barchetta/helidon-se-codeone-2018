@@ -108,6 +108,19 @@ public final class Main {
     }
 
     /**
+     * Create a configured instance of {@link WebSecurity} using the given config.
+     * @param config the configuration root
+     * @return the created {@code WebSecurity}
+     */
+    private static WebSecurity createWebSecurity(final Config config) {
+        Security security = Security.builder()
+            .addProvider(GoogleTokenProvider.builder()
+                .clientId(config.get("security.properties.google-client-id").asString()))
+            .build();
+        return WebSecurity.from(security);
+    }
+
+    /**
      * Application main entry point.
      * @param args command line arguments.
      * @throws IOException if there are problems reading logging properties
@@ -128,19 +141,20 @@ public final class Main {
                 Main.class.getResourceAsStream("/logging.properties"));
 
         // By default this will pick up application.yaml from the classpath
-        Config config = Config.create();
+        final Config config = Config.create();
 
-        ServerConfiguration serverConfig = ServerConfiguration.builder(config.get("webserver"))
-                .tracer(createTracer(config))
+        final Tracer tracer = createTracer(config);
+
+        final ServerConfiguration serverConfig = ServerConfiguration
+                .builder(config.get("webserver"))
+                .tracer(tracer)
                 .build();
 
-        Security security = Security.builder()
-                .addProvider(GoogleTokenProvider.builder()
-                        .clientId(config.get("security.properties.google-client-id").asString()))
-                .build();
-        WebSecurity webSecurity = WebSecurity.from(security);
+        final WebSecurity webSecurity = createWebSecurity(config);
 
-        WebServer server = WebServer.create(serverConfig, createRouting(webSecurity));
+        final Routing routing = createRouting(webSecurity);
+
+        final WebServer server = WebServer.create(serverConfig, routing);
 
         // Start the server and print some info.
         server.start().thenAccept(ws -> {

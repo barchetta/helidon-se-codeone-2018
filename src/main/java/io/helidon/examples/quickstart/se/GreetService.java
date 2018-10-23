@@ -67,10 +67,14 @@ public class GreetService implements Service {
     private static volatile String greeting = CONFIG.get("greeting").asString("Ciao");
 
     /**
-     * Create metric counter.
+     * Create metric registry.
      */
     private final MetricRegistry registry = RegistryFactory.getRegistryFactory().get()
         .getRegistry(MetricRegistry.Type.APPLICATION);
+
+    /**
+     * Counter for all requests to this service.
+     */
     private final Counter greetCounter = registry.counter("accessctr");
 
     /**
@@ -225,6 +229,7 @@ public class GreetService implements Service {
          * We create a tracing span for this long operation. We create it as
          * a child of the request's span.
          */
+        //Tracer tracer = request.webServer().configuration().tracer();
         Span span = GlobalTracer.get()
                 .buildSpan("updateGreetingFromJsonSlowlyHandler")
                 .asChildOf(request.spanContext())
