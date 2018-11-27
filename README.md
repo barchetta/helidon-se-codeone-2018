@@ -74,15 +74,6 @@ docker run --rm -p 8080:8080 quickstart-se:latest
 
 Exercise the application as described above
 
-## Deploy the application to Kubernetes
-
-```
-kubectl cluster-info                # Verify which cluster
-kubectl get pods                    # Verify connectivity to cluster
-kubectl create -f target/app.yaml   # Deply application
-kubectl get service quickstart-se  # Get service info
-```
-
 ## Metrics
 
 The application makes metrics available at the `/metrics/` endpoint.
@@ -119,7 +110,6 @@ Once Prometheus is runnining access the console (e.g. `localhost:9090/graph`)
  that were described earlier. Click `Execute` again and you should
  see the counter increase.
 
-
 ## Tracing
 
 By default the application is configured to connect to zipkin at `http://localhost:9411`.
@@ -142,3 +132,12 @@ To view traces go to http://localhost:9411/zipkin/
 Click on "Find a Trace". Click on "Find Traces" and sort by newest. 
 You should see a roughly 2 second trace.
 
+
+## Deploy the application to Kubernetes
+
+```
+kubectl cluster-info                # Verify which cluster
+kubectl get pods                    # Verify connectivity to cluster
+kubectl create -f target/app.yaml   # Deply application
+kubectl get service quickstart-se  # Get service info
+```
