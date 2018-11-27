@@ -96,6 +96,29 @@ curl -H 'Accept: application/json' -X GET http://localhost:8080/metrics/ | json_
 curl -H 'Accept: text/plain' -X GET http://localhost:8080/metrics/
 ```
 
+To configure Prometheus to scrape metrics from the application
+add this to  `prometheus.yml` under `scrape_configs:`:
+
+```
+  - job_name: 'helidon'
+
+    metrics_path: '/metrics/'
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+    - targets: ['localhost:8080']
+```
+
+Once Prometheus is runnining access the console (e.g. `localhost:9090/graph`)
+ and click `Graph`. Enter `application:accessctr` then click
+ `Execute`.
+
+ You should see the graph plotting the application's `accessctr`
+ metric. Exercise the application some more using the curl commands
+ that were described earlier. Click `Execute` again and you should
+ see the counter increase.
+
 
 ## Tracing
 
