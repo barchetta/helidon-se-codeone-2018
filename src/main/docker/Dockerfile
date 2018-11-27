@@ -14,8 +14,8 @@
 # limitations under the License.
 #
 
-#FROM openjdk:8-jre-slim
-FROM openjdk:8-jre-alpine
+FROM openjdk:8-jre-slim
+#FROM openjdk:8-jre-alpine
 
 RUN mkdir /app
 COPY libs /app/libs
