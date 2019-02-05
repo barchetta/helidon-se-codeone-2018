@@ -22,16 +22,18 @@ import java.util.logging.LogManager;
 
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
+import io.helidon.health.HealthSupport;
+import io.helidon.health.checks.HealthChecks;
 import io.helidon.metrics.MetricsSupport;
 import io.helidon.security.Security;
-import io.helidon.security.webserver.WebSecurity;
-import io.helidon.security.google.GoogleTokenProvider;
+import io.helidon.security.integration.webserver.WebSecurity;
+import io.helidon.security.providers.google.login.GoogleTokenProvider;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.StaticContentSupport;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.json.JsonSupport;
-import io.helidon.webserver.zipkin.ZipkinTracerBuilder;
+import io.helidon.tracing.zipkin.ZipkinTracerBuilder;
 
 import io.opentracing.Tracer;
 import io.opentracing.util.GlobalTracer;
@@ -65,14 +67,17 @@ public final class Main {
      * @return the new instance
      */
     private static Routing createRouting(WebSecurity webSecurity) {
+
+        HealthSupport health = HealthSupport.builder()
+            .add(HealthChecks.healthChecks())   // Adds a convenient set of checks
+            .build();
+
         return Routing.builder()
                 .register(webSecurity)
-                .register(JsonSupport.get())
+                .register(JsonSupport.create())
                 .register(MetricsSupport.create())
-                .get("/health", (req, res) -> {
-                    res.status(Http.Status.OK_200);
-                    res.send("OK!");
-                })
+                .register(health)                   // Health at "/health"
+                .register(MetricsSupport.create())  // Metrics at "/metrics"
                 .get("/ready", (req, res) -> {
                     res.status(Http.Status.OK_200);
                     res.send("Ready!");
@@ -90,13 +95,15 @@ public final class Main {
      * @return the created {@code Tracer}
      */
     private static Tracer createTracer(final Config config) {
-        Optional<String> zipkinEndpoint = config.get("services.zipkin.endpoint")
-                .asOptionalString();
+        Optional<String>  zipkinHost = config.get("services.zipkin.host").asString().asOptional();
+        Optional<Integer> zipkinPort = config.get("services.zipkin.port").asInt().asOptional();
 
-        if (zipkinEndpoint.isPresent()) {
-            System.out.println("Sending trace data to " + zipkinEndpoint.get());
+        if (zipkinHost.isPresent() && zipkinPort.isPresent()) {
+            System.out.println("Sending trace data to " + zipkinHost.get() + ":" + zipkinPort.get());
             Tracer tracer = ZipkinTracerBuilder.forService("greet-service")
-                    .zipkin(zipkinEndpoint.get())
+                    .collectorHost(zipkinHost.get())
+                    .collectorPort(zipkinPort.get())
+                    .enabled(true)
                     .build();
             GlobalTracer.register(tracer);
         } else {
@@ -114,9 +121,9 @@ public final class Main {
     private static WebSecurity createWebSecurity(final Config config) {
         Security security = Security.builder()
             .addProvider(GoogleTokenProvider.builder()
-                .clientId(config.get("security.properties.google-client-id").asString()))
+                .clientId(config.get("security.properties.google-client-id").asString().get()))
             .build();
-        return WebSecurity.from(security);
+        return WebSecurity.create(security);
     }
 
     /**
@@ -142,11 +149,9 @@ public final class Main {
         // By default this will pick up application.yaml from the classpath
         final Config config = Config.create();
 
-        final Tracer tracer = createTracer(config);
-
-        final ServerConfiguration serverConfig = ServerConfiguration
-                .builder(config.get("webserver"))
-                .tracer(tracer)
+        final ServerConfiguration serverConfig =
+                ServerConfiguration.builder(config.get("webserver"))
+                .tracer(createTracer(config))
                 .build();
 
         final WebSecurity webSecurity = createWebSecurity(config);

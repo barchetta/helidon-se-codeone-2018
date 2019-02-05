@@ -74,6 +74,14 @@ docker run --rm -p 8080:8080 quickstart-se:latest
 
 Exercise the application as described above
 
+## Health
+
+Health checks are at `/health`
+
+```
+curl -X GET http://localhost:8080/health
+```
+
 ## Metrics
 
 The application makes metrics available at the `/metrics/` endpoint.

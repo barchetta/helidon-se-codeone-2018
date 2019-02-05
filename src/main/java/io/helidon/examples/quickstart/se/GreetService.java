@@ -22,7 +22,7 @@ import javax.json.JsonObject;
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
 import io.helidon.metrics.RegistryFactory;
-import io.helidon.security.webserver.WebSecurity;
+import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerRequest;
 import io.helidon.webserver.ServerResponse;
@@ -64,7 +64,7 @@ public class GreetService implements Service {
     /**
      * The config value for the key {@code greeting}.
      */
-    private static volatile String greeting = CONFIG.get("greeting").asString("Ciao");
+    private static volatile String greeting = CONFIG.get("greeting").asString().orElse("Ciao");
 
     /**
      * Create metric registry.
@@ -96,8 +96,8 @@ public class GreetService implements Service {
     /**
      * Runs for every request and increments a simple counter.
      * Calls request.next() to ensure other handlers are called.
-     * @param request
-     * @param response
+     * @param request the server request
+     * @param response the server response
      */
     private void counterFilter(final ServerRequest request,
                                final ServerResponse response) {
@@ -259,7 +259,7 @@ public class GreetService implements Service {
             int delayInSecs = jo.getInt("delay", 2);
             try {
                 Thread.sleep(delayInSecs * 1000);
-            } catch (InterruptedException e) {
+            } catch (InterruptedException ignored) {
             }
 
             greeting = jo.getString("greeting");
