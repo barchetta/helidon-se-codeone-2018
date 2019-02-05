@@ -16,18 +16,18 @@ function isFunction(obj) {
 }
 
 function __put(url, data, on_complete) {
-    var access_token = getAccessToken();
+    // var access_token = getAccessToken();
 
     console.log("__put initiated", url, data);
 
     try {
         $.ajax({
             type: "PUT",
-            beforeSend: function (request) {
+            /* beforeSend: function (request) {
                 if (access_token !== undefined) {
                     request.setRequestHeader("Authorization", "Bearer " + access_token);
                 }
-            },
+            }, */
             url: url,
             dataType: "json",
             contentType: "application/json;charset=utf-8",
@@ -46,18 +46,19 @@ function __put(url, data, on_complete) {
 }
 
 function __get(url, on_complete) {
-    var access_token = getAccessToken();
+    // var access_token = getAccessToken();
 
     console.log("__get initiated", url);
 
     try {
         $.ajax({
             type: "GET",
-            beforeSend: function (request) {
+            /* beforeSend: function (request) {
                 if (access_token !== undefined) {
                     request.setRequestHeader("Authorization", "Bearer " + access_token);
                 }
             },
+            */
             url: url
         }).done(function (data) {
             console.log("__get success", url, data);
@@ -85,10 +86,11 @@ function renderUpdateGreeting(greeting) {
 function loadPage(signedIn) {
     var greetingForm = $("#greeting-form");
     greetingForm.find("button").click(doGreeting);
-    if(!signedIn){
+    /* if(!signedIn){
         $("#page-wrapper").fadeIn(100);
         return;
     }
+    */
 
     __get("/greet/greeting", function (data) {
         if (data.length === 0 || data.greeting === undefined) {
@@ -144,6 +146,7 @@ function doUpdateGreeting(){
 
 function loadPage0() {
 
+/*
     var signedIn = isSignedIn();
     if (signedIn) {
 
@@ -174,6 +177,8 @@ function loadPage0() {
         }
     }
     loadPage(signedIn);
+    */
+    loadPage(true);
 }
 
 function clearPage(on_complete) {

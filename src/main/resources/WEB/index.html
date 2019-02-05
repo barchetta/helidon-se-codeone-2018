@@ -123,7 +123,7 @@
       window.onLoadCallback = function() {
           $("#refresh-btn").click(loadPage);
           // gapi available
-          gapi.load('auth2', function () {
+          /* gapi.load('auth2', function () {
               // on body load
               $(function () {
                   try {
@@ -138,6 +138,8 @@
                   }
               });
           });
+          */
+          loadPage0();
       };
     </script>
     <script src="https://apis.google.com/js/api:client.js?onload=onLoadCallback"></script>

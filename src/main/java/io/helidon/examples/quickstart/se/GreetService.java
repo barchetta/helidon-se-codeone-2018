@@ -88,7 +88,7 @@ public class GreetService implements Service {
             .get("/", this::getDefaultMessageHandler)
             .get("/greeting", this::getGreetingHandler)
             .get("/{name}", this::getMessageHandler)
-            .put("/greeting/{greeting}", WebSecurity.authenticate(), this::updateGreetingHandler)
+            .put("/greeting/{greeting}", /* WebSecurity.authenticate(), */ this::updateGreetingHandler)
             .post("/greeting", this::updateGreetingJsonHandler)
             .post("/slowgreeting", this::updateGreetingJsonSlowlyHandler);
     }

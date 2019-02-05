@@ -73,7 +73,7 @@ public final class Main {
             .build();
 
         return Routing.builder()
-                .register(webSecurity)
+                /* .register(webSecurity) */
                 .register(JsonSupport.create())
                 .register(MetricsSupport.create())
                 .register(health)                   // Health at "/health"
