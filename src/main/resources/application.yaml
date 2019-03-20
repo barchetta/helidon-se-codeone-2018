@@ -19,9 +19,11 @@ app:
 
 services:
   # Use this hostname if running in a docker container
-  # zipkin.host: docker.for.mac.localhost:
-  zipkin.host: localhost
-  zipkin.port: 9411
+  # tracing.host: docker.for.mac.localhost:
+  tracing:
+    service: greet-service
+    host: localhost
+    port: 9411
 
 webserver:
   port: 8080

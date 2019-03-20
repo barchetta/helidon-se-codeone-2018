@@ -17,27 +17,27 @@
 package io.helidon.examples.quickstart.se;
 
 import java.io.IOException;
-import java.util.Optional;
 import java.util.logging.LogManager;
 
 import io.helidon.common.http.Http;
 import io.helidon.config.Config;
 import io.helidon.health.HealthSupport;
 import io.helidon.health.checks.HealthChecks;
+import io.helidon.media.jsonp.server.JsonSupport;
 import io.helidon.metrics.MetricsSupport;
 import io.helidon.security.Security;
 import io.helidon.security.integration.webserver.WebSecurity;
 import io.helidon.security.providers.google.login.GoogleTokenProvider;
+import io.helidon.tracing.TracerBuilder;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.StaticContentSupport;
 import io.helidon.webserver.WebServer;
-//import io.helidon.webserver.json.JsonSupport;
-import io.helidon.media.jsonp.server.JsonSupport;
-import io.helidon.tracing.zipkin.ZipkinTracerBuilder;
 
 import io.opentracing.Tracer;
-import io.opentracing.util.GlobalTracer;
+import io.opentracing.noop.NoopTracer;
+
+//import io.helidon.webserver.json.JsonSupport;
 
 /**
  * Simple Hello World rest application.
@@ -76,7 +76,6 @@ public final class Main {
         return Routing.builder()
                 /* .register(webSecurity) */
                 .register(JsonSupport.create())
-                .register(MetricsSupport.create())
                 .register(health)                   // Health at "/health"
                 .register(MetricsSupport.create())  // Metrics at "/metrics"
                 .get("/ready", (req, res) -> {
@@ -96,22 +95,16 @@ public final class Main {
      * @return the created {@code Tracer}
      */
     private static Tracer createTracer(final Config config) {
-        Optional<String>  zipkinHost = config.get("services.zipkin.host").asString().asOptional();
-        Optional<Integer> zipkinPort = config.get("services.zipkin.port").asInt().asOptional();
+        Tracer tracer = TracerBuilder.create(config.get("services.tracing"))
+                .buildAndRegister();
 
-        if (zipkinHost.isPresent() && zipkinPort.isPresent()) {
-            System.out.println("Sending trace data to " + zipkinHost.get() + ":" + zipkinPort.get());
-            Tracer tracer = ZipkinTracerBuilder.forService("greet-service")
-                    .collectorHost(zipkinHost.get())
-                    .collectorPort(zipkinPort.get())
-                    .enabled(true)
-                    .build();
-            GlobalTracer.register(tracer);
+        if (tracer instanceof NoopTracer) {
+            System.out.println("Tracer libraries are not available, not tracing");
         } else {
-            System.out.println("services.zipkin.uri not defined. Sending no trace data");
+            System.out.println("Tracing using " + tracer.getClass().getName() + " tracer");
         }
 
-        return GlobalTracer.get();
+        return tracer;
     }
 
     /**
