@@ -32,7 +32,8 @@ import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.StaticContentSupport;
 import io.helidon.webserver.WebServer;
-import io.helidon.webserver.json.JsonSupport;
+//import io.helidon.webserver.json.JsonSupport;
+import io.helidon.media.jsonp.server.JsonSupport;
 import io.helidon.tracing.zipkin.ZipkinTracerBuilder;
 
 import io.opentracing.Tracer;
